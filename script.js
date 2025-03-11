@@ -13,7 +13,7 @@ function uploadPicklist() {
     let file = fileInput.files[0];
 
     if (!file) {
-        alert("Please select a CSV file");
+        alert("Please select a CSV file.");
         return;
     }
 
@@ -25,8 +25,14 @@ function uploadPicklist() {
 }
 
 function parseCSV(csvData) {
-    let rows = csvData.split("\n").map(row => row.split(","));
-    let headers = rows[0].map(header => header.trim().toLowerCase());
+    let rows = csvData.trim().split("\n").map(row => row.split(",").map(cell => cell.trim()));
+
+    if (rows.length < 2) {
+        alert("Error: CSV file is missing data.");
+        return;
+    }
+
+    let headers = rows[0].map(header => header.toLowerCase());
     let orderIndex = headers.indexOf("order");
     let imeiIndex = headers.indexOf("esn");
     let modelIndex = headers.indexOf("model");
@@ -35,7 +41,7 @@ function parseCSV(csvData) {
     let locationIndex = headers.indexOf("location");
 
     if (imeiIndex === -1 || orderIndex === -1) {
-        alert("Invalid CSV format: 'Order' and 'ESN' columns not found.");
+        alert("Error: The CSV file is missing required headers (Order, ESN).");
         return;
     }
 
@@ -44,10 +50,10 @@ function parseCSV(csvData) {
 
     for (let i = 1; i < rows.length; i++) {
         let row = rows[i];
-        if (row.length < headers.length) continue;
+        if (row.length < headers.length) continue; 
 
-        let order = row[orderIndex].trim();
-        let imei = row[imeiIndex].trim();
+        let order = row[orderIndex]?.trim() || "Unknown Order";
+        let imei = row[imeiIndex]?.trim() || "";
         let model = row[modelIndex]?.trim() || "Unknown Model";
         let storage = row[storageIndex]?.trim() || "Unknown Storage";
         let color = row[colorIndex]?.trim() || "Unknown Color";
@@ -58,12 +64,22 @@ function parseCSV(csvData) {
         }
     }
 
+    if (orders.length === 0) {
+        alert("Error: No valid IMEIs found in the CSV file.");
+        return;
+    }
+
     displayOrders();
 }
 
 function displayOrders() {
     let ordersTable = document.getElementById("orders");
-    ordersTable.innerHTML = "";
+    ordersTable.innerHTML = ""; 
+
+    if (orders.length === 0) {
+        ordersTable.innerHTML = "<tr><td colspan='6'>No IMEIs loaded.</td></tr>";
+        return;
+    }
 
     orders.forEach((order, index) => {
         let row = document.createElement("tr");
@@ -87,12 +103,8 @@ function highlightNextIMEI() {
         let row = document.getElementById(`row-${index}`);
 
         // ✅ Keep green (scanned) and orange (skipped) rows unchanged
-        if (!row.classList.contains("green")) {
-            if (skippedOrders.some(entry => entry.index === index)) {
-                row.classList.add("orange"); // Ensure it stays orange
-            } else {
-                row.classList.remove("next", "red", "orange");
-            }
+        if (!row.classList.contains("green") && !row.classList.contains("orange")) {
+            row.classList.remove("next", "red");
         }
     });
 
@@ -173,26 +185,13 @@ function updateSkippedList() {
             row.classList.add("orange");
             row.setAttribute("onclick", `undoSpecificSkip(${entry.index})`);
         }
-
-        let newRow = document.createElement("tr");
-        newRow.setAttribute("data-index", entry.index);
-        newRow.setAttribute("onclick", `undoSpecificSkip(${entry.index})`);
-        newRow.innerHTML = `
-            <td>${entry.order.order}</td>
-            <td>${entry.order.imei}</td>
-            <td>${entry.order.model}</td>
-            <td>${entry.order.storage}</td>
-            <td>${entry.order.color}</td>
-            <td>${entry.order.location}</td>
-        `;
-        skippedTable.appendChild(newRow);
     });
 }
 
 function undoSpecificSkip(index) {
     let row = document.getElementById(`row-${index}`);
 
-    console.log(`🔄 Attempting to undo skipped IMEI: ${orders[index].imei}`);
+    console.log(`🔄 Undo Skipped IMEI: ${orders[index].imei}`);
 
     // ✅ If it was already skipped but not scanned, keep it orange
     if (!row.classList.contains("green")) {
@@ -217,13 +216,13 @@ function undoSpecificSkip(index) {
 function moveToNextUnscannedIMEI() {
     while (currentIndex < orders.length) {
         let row = document.getElementById(`row-${currentIndex}`);
-        
+
         // ✅ If the row is already green (scanned), move forward
         if (row.classList.contains("green")) {
             currentIndex++;
             continue;
         }
-        
+
         // ✅ If the row is skipped (orange), check the next one
         if (row.classList.contains("orange")) {
             currentIndex++;
