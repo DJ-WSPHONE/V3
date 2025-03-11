@@ -181,12 +181,21 @@ function updateSkippedList() {
 
 function undoSpecificSkip(index) {
     let row = document.getElementById(`row-${index}`);
+    
+    console.log(`🔄 Undo Skipped IMEI: ${orders[index].imei}`);
+
+    // ✅ Remove orange and make it active again
     row.classList.remove("orange");
     row.classList.add("next");
+
+    // ✅ Remove undo option
     row.removeAttribute("onclick");
 
+    // ✅ Remove from skipped list
     skippedOrders = skippedOrders.filter(entry => entry.index !== index);
+    updateSkippedList();
+
+    // ✅ Set the active IMEI to the one just undone
     currentIndex = index;
     highlightNextIMEI();
-    updateSkippedList();
 }
