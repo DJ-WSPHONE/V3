@@ -92,8 +92,11 @@ function highlightNextIMEI() {
         }
     });
 
-    // ✅ Move to the next valid IMEI that has not been scanned
-    moveToNextUnscannedIMEI();
+    // ✅ Ensure the next pending IMEI is highlighted yellow
+    if (currentIndex < orders.length) {
+        let activeRow = document.getElementById(`row-${currentIndex}`);
+        activeRow.classList.add("next");
+    }
 }
 
 function checkIMEI() {
@@ -206,13 +209,13 @@ function undoSpecificSkip(index) {
 function moveToNextUnscannedIMEI() {
     while (currentIndex < orders.length) {
         let row = document.getElementById(`row-${currentIndex}`);
-        
+
         // ✅ If the row is already green (scanned), move forward
         if (row.classList.contains("green")) {
             currentIndex++;
             continue;
         }
-        
+
         // ✅ If the row is skipped (orange), check the next one
         if (row.classList.contains("orange")) {
             currentIndex++;
@@ -223,5 +226,5 @@ function moveToNextUnscannedIMEI() {
         break;
     }
 
-    highlightNextIMEI();
+    highlightNextIMEI(); // ✅ Now, correctly highlights yellow
 }
