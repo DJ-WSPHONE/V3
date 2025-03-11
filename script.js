@@ -87,13 +87,20 @@ function highlightNextIMEI() {
         let row = document.getElementById(`row-${index}`);
 
         // ✅ Keep green (scanned) and orange (skipped) rows unchanged
-        if (!row.classList.contains("green") && !row.classList.contains("orange")) {
-            row.classList.remove("next", "red");
+        if (!row.classList.contains("green")) {
+            if (skippedOrders.some(entry => entry.index === index)) {
+                row.classList.add("orange"); // Ensure it stays orange
+            } else {
+                row.classList.remove("next", "red", "orange");
+            }
         }
     });
 
-    // ✅ Move to the next valid IMEI that has not been scanned
-    moveToNextUnscannedIMEI();
+    // ✅ Ensure the next pending IMEI is highlighted yellow
+    if (currentIndex < orders.length) {
+        let activeRow = document.getElementById(`row-${currentIndex}`);
+        activeRow.classList.add("next");
+    }
 }
 
 function checkIMEI() {
@@ -185,20 +192,24 @@ function updateSkippedList() {
 function undoSpecificSkip(index) {
     let row = document.getElementById(`row-${index}`);
 
-    console.log(`🔄 Undo Skipped IMEI: ${orders[index].imei}`);
+    console.log(`🔄 Attempting to undo skipped IMEI: ${orders[index].imei}`);
 
-    // ✅ Remove orange and make it active again
-    row.classList.remove("orange");
-    row.classList.add("next");
+    // ✅ If it was already skipped but not scanned, keep it orange
+    if (!row.classList.contains("green")) {
+        row.classList.remove("next");
+        row.classList.add("orange");
+    }
 
-    // ✅ Remove undo option
+    // ✅ Remove undo option so it doesn't stay clickable unless skipped again
     row.removeAttribute("onclick");
 
-    // ✅ Remove from skipped list
-    skippedOrders = skippedOrders.filter(entry => entry.index !== index);
+    // ✅ Ensure it stays in the skipped list if not scanned
+    if (!skippedOrders.some(entry => entry.index === index)) {
+        skippedOrders.push({ index, order: orders[index] });
+    }
     updateSkippedList();
 
-    // ✅ Move back to this IMEI for scanning
+    // ✅ Set the current index to move forward properly
     currentIndex = index;
     highlightNextIMEI();
 }
