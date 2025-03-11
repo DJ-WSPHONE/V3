@@ -13,17 +13,21 @@ function uploadPicklist() {
     let file = fileInput.files[0];
 
     if (!file) {
-        alert("Please select a CSV file");
+        alert("Please select a CSV file.");
         return;
     }
 
     let reader = new FileReader();
     reader.onload = function (event) {
-        parseCSV(event.target.result);
+        let csvContent = event.target.result.trim(); // ✅ Trim to prevent empty lines
+        if (csvContent.length === 0) {
+            alert("Error: The uploaded CSV file is empty.");
+            return;
+        }
+        parseCSV(csvContent);
     };
     reader.readAsText(file);
 }
-
 function parseCSV(csvData) {
     let rows = csvData.split("\n").map(row => row.split(","));
     let headers = rows[0].map(header => header.trim().toLowerCase());
