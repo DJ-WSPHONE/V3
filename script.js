@@ -85,12 +85,10 @@ function displayOrders() {
 function highlightNextIMEI() {
     orders.forEach((_, index) => {
         let row = document.getElementById(`row-${index}`);
-        row.classList.remove("next", "green", "orange", "red");
 
-        if (row.classList.contains("orange")) {
-            row.setAttribute("onclick", `undoSpecificSkip(${index})`);
-        } else {
-            row.removeAttribute("onclick");
+        // â Keep green rows unchanged while removing others
+        if (!row.classList.contains("green")) {
+            row.classList.remove("next", "orange", "red");
         }
     });
 
@@ -104,13 +102,25 @@ function checkIMEI() {
     let scannerInput = document.getElementById("scanner").value.trim();
     let resultRow = document.getElementById(`row-${currentIndex}`);
 
+    if (!resultRow) {
+        alert("No more IMEIs left to scan.");
+        return;
+    }
+
     if (scannerInput === orders[currentIndex].imei) {
+        console.log(`â Correct IMEI Scanned: ${scannerInput}`);
+
+        // â Apply green and prevent further modifications
         resultRow.classList.remove("next", "red");
         resultRow.classList.add("green");
         resultRow.removeAttribute("onclick");
+
         currentIndex++;
         highlightNextIMEI();
     } else {
+        console.log(`â Incorrect IMEI Scanned: ${scannerInput}`);
+
+        // â Flash red for incorrect scan
         resultRow.classList.add("red");
         setTimeout(() => {
             resultRow.classList.remove("red");
