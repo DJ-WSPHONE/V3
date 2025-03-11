@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMEI Pick List Scanner</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>IMEI Pick List Scanner</h1>
+
+    <div class="scan-section">
+        <input type="text" id="scanner" placeholder="Scan IMEI Here..." onkeypress="handleKeyPress(event)">
+        <button class="button" onclick="checkIMEI()">Enter</button>
+        <button class="button" onclick="skipIMEI()">Skip IMEI</button>
+    </div>
+
+    <h2>Upload Pick List</h2>
+    <input type="file" id="picklistUpload" accept=".csv">
+    <button class="button" onclick="uploadPicklist()">Upload</button>
+
+    <div class="container">
+        <h2>Active IMEI List</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Order Number</th>
+                    <th>IMEI</th>
+                    <th>Model</th>
+                    <th>Storage</th>
+                    <th>Color</th>
+                    <th>Location</th>
+                </tr>
+            </thead>
+            <tbody id="orders"></tbody>
+        </table>
+    </div>
+
+    <div class="container">
+        <h2>Skipped IMEIs</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Order Number</th>
+                    <th>IMEI</th>
+                    <th>Model</th>
+                    <th>Storage</th>
+                    <th>Color</th>
+                    <th>Location</th>
+                </tr>
+            </thead>
+            <tbody id="skipped-orders"></tbody>
+        </table>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
