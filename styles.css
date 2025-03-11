@@ -1,0 +1,45 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+.container {
+    width: 90%;
+    margin: auto;
+    text-align: left;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+th, td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+th {
+    background-color: #f4f4f4;
+}
+.next {
+    background-color: yellow; /* Next IMEI */
+}
+.green {
+    background-color: lightgreen; /* Correct Scan */
+}
+.orange {
+    background-color: orange; /* Skipped IMEI */
+}
+.red {
+    background-color: lightcoral; /* Incorrect Scan */
+}
+
+/* Flash Red Animation for Incorrect IMEI */
+@keyframes flashRed {
+    0% { background-color: red; }
+    50% { background-color: #ff9999; }
+    100% { background-color: red; }
+}
+.error {
+    animation: flashRed 0.5s alternate;
+    animation-iteration-count: 4; /* Flash for 2 seconds */
+}
