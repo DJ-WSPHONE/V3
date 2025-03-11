@@ -152,19 +152,17 @@ function skipIMEI() {
 
     console.log(`⚠️ IMEI Skipped: ${orders[currentIndex].imei}`);
 
-    // ✅ Set row color to orange (permanent)
     resultRow.classList.remove("next");
     resultRow.classList.add("orange");
 
-    // ✅ Prevent duplicates in the skipped list
-    if (!skippedOrders.some(entry => entry.order.imei === orders[currentIndex].imei)) {
+    if (!skippedOrders.some(entry => entry.index === currentIndex)) {
         skippedOrders.push({ index: currentIndex, order: orders[currentIndex] });
     }
 
-    updateSkippedList(); // ✅ Update the skipped list
-
+    updateSkippedList();
     moveToNextUnscannedIMEI();
 }
+
 function updateSkippedList() {
     let skippedTable = document.getElementById("skipped-orders");
     skippedTable.innerHTML = "";
@@ -174,10 +172,16 @@ function updateSkippedList() {
         return;
     }
 
-    // ✅ Ensure unique skipped IMEIs
     let uniqueSkipped = Array.from(new Map(skippedOrders.map(item => [item.order.imei, item])).values());
 
     uniqueSkipped.forEach((entry) => {
+        let row = document.getElementById(`row-${entry.index}`);
+
+        if (row) {
+            row.classList.add("orange");
+            row.setAttribute("onclick", `undoSpecificSkip(${entry.index})`);
+        }
+
         let newRow = document.createElement("tr");
         newRow.setAttribute("data-index", entry.index);
         newRow.setAttribute("onclick", `undoSpecificSkip(${entry.index})`);
@@ -193,14 +197,15 @@ function updateSkippedList() {
         skippedTable.appendChild(newRow);
     });
 }
+
 function undoSpecificSkip(index) {
     let row = document.getElementById(`row-${index}`);
 
-    console.log(`🔄 Undo Skipped IMEI: ${orders[index].imei}`);
+    console.log(`🔄 Undoing Skipped IMEI: ${orders[index].imei}`);
 
     if (!row.classList.contains("green")) {
-        row.classList.remove("next");
-        row.classList.add("orange");
+        row.classList.remove("orange");
+        row.classList.add("next");
     }
 
     row.removeAttribute("onclick");
@@ -222,8 +227,7 @@ function moveToNextUnscannedIMEI() {
         }
 
         if (row.classList.contains("orange")) {
-            currentIndex++;
-            continue;
+            break; // Allow going back to a skipped IMEI
         }
 
         break;
