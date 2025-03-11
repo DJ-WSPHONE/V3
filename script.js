@@ -152,31 +152,32 @@ function skipIMEI() {
 
     console.log(`⚠️ IMEI Skipped: ${orders[currentIndex].imei}`);
 
+    // ✅ Set row color to orange (permanent)
     resultRow.classList.remove("next");
     resultRow.classList.add("orange");
 
+    // ✅ Prevent duplicates in the skipped list
     if (!skippedOrders.some(entry => entry.order.imei === orders[currentIndex].imei)) {
         skippedOrders.push({ index: currentIndex, order: orders[currentIndex] });
     }
 
-    updateSkippedList();
+    updateSkippedList(); // ✅ Update the skipped list
+
     moveToNextUnscannedIMEI();
 }
-
 function updateSkippedList() {
     let skippedTable = document.getElementById("skipped-orders");
     skippedTable.innerHTML = "";
 
+    if (skippedOrders.length === 0) {
+        skippedTable.innerHTML = "<tr><td colspan='6'>No Skipped IMEIs</td></tr>";
+        return;
+    }
+
+    // ✅ Ensure unique skipped IMEIs
     let uniqueSkipped = Array.from(new Map(skippedOrders.map(item => [item.order.imei, item])).values());
 
     uniqueSkipped.forEach((entry) => {
-        let row = document.getElementById(`row-${entry.index}`);
-
-        if (row) {
-            row.classList.add("orange");
-            row.setAttribute("onclick", `undoSpecificSkip(${entry.index})`);
-        }
-
         let newRow = document.createElement("tr");
         newRow.setAttribute("data-index", entry.index);
         newRow.setAttribute("onclick", `undoSpecificSkip(${entry.index})`);
@@ -188,10 +189,10 @@ function updateSkippedList() {
             <td>${entry.order.color}</td>
             <td>${entry.order.location}</td>
         `;
+
         skippedTable.appendChild(newRow);
     });
 }
-
 function undoSpecificSkip(index) {
     let row = document.getElementById(`row-${index}`);
 
