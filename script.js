@@ -86,17 +86,19 @@ function highlightNextIMEI() {
     orders.forEach((_, index) => {
         let row = document.getElementById(`row-${index}`);
 
-        // ✅ Keep green rows unchanged while updating others
-        if (!row.classList.contains("green")) {
-            row.classList.remove("next", "orange", "red");
+        // ✅ Keep green (scanned) and orange (skipped) rows unchanged
+        if (!row.classList.contains("green") && !row.classList.contains("orange")) {
+            row.classList.remove("next", "red");
         }
     });
 
+    // ✅ Set the next IMEI to be yellow (active)
     if (currentIndex < orders.length) {
         let activeRow = document.getElementById(`row-${currentIndex}`);
         activeRow.classList.add("next");
     }
 }
+
 function checkIMEI() {
     let scannerInput = document.getElementById("scanner").value.trim();
     let resultRow = document.getElementById(`row-${currentIndex}`);
@@ -134,13 +136,23 @@ function checkIMEI() {
 
 function skipIMEI() {
     let resultRow = document.getElementById(`row-${currentIndex}`);
+
+    if (!resultRow) return;
+
+    console.log(`⚠️ IMEI Skipped: ${orders[currentIndex].imei}`);
+
+    // ✅ Set row color to orange (permanent)
     resultRow.classList.remove("next");
     resultRow.classList.add("orange");
+
+    // ✅ Allow clicking to undo
     resultRow.setAttribute("onclick", `undoSpecificSkip(${currentIndex})`);
 
+    // ✅ Store skipped IMEI in the skipped list
     skippedOrders.push({ index: currentIndex, order: orders[currentIndex] });
     updateSkippedList();
 
+    // ✅ Move to next IMEI
     currentIndex++;
     highlightNextIMEI();
 }
